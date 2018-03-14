@@ -1,0 +1,29 @@
+version: '3'
+services:
+  appx:
+    image: "appx:0.1.0"
+    ports:
+     - "8080:8080"
+  prometheus:
+    image: prom/prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    links:
+      - blackbox_exporter
+    volumes:
+      - "./config:/config"
+      - "./data/prometheus:/data"
+    command: --config.file=/config/prometheus.yml
+  blackbox_exporter:
+    image: prom/blackbox-exporter
+    ports:
+      - "9115:9115"
+    dns: 8.8.8.8
+    restart: always
+    ports:
+      - "9115:9115"
+    volumes:
+      - "./config:/config"
+    command: --config.file=/config/blackbox.yml
+
