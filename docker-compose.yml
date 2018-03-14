@@ -1,7 +1,7 @@
 version: '3'
 services:
   appx:
-    image: "appx:0.1.0"
+    image: "appx:latest"
     ports:
      - "8080:8080"
   prometheus:
