@@ -4,3 +4,7 @@ services:
     image: "appx:1"
     ports:
      - "8080:8080"
+  chat-ui:
+    image: "devopspro.daftano.com/ui:latest"
+    ports:
+     - "7777:80"
