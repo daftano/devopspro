@@ -1,0 +1,6 @@
+version: '3'
+services:
+  appx:
+    image: "appx:1"
+    ports:
+     - "8080:8080"
