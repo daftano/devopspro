@@ -1,6 +1,59 @@
 version: '3'
 services:
   appx:
-    image: "appx:1"
+    image: "appx:latest"
     ports:
      - "8080:8080"
+  prometheus:
+    image: prom/prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    links:
+      - blackbox_exporter
+    volumes:
+      - "./config:/config"
+      - "./data/prometheus:/data"
+    command: --config.file=/config/prometheus.yml
+  blackbox_exporter:
+    image: prom/blackbox-exporter
+    ports:
+      - "9115:9115"
+    dns: 8.8.8.8
+    restart: always
+    ports:
+      - "9115:9115"
+    volumes:
+      - "./config:/config"
+    command: --config.file=/config/blackbox.yml
+  elasticsearch:
+    build:
+      context: elasticsearch/
+    volumes:
+      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+  logstash:
+    build:
+      context: logstash/
+    volumes:
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+    ports:
+      - "5000:5000"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    depends_on:
+      - elasticsearch
+  kibana:
+    build:
+      context: kibana/
+    volumes:
+      - ./kibana/config/:/usr/share/kibana/config:ro
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch

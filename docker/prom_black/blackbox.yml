@@ -1,0 +1,53 @@
+modules:
+  http_2xx:
+    prober: http
+    http:
+  http_post_2xx:
+    prober: http
+    http:
+      method: POST
+  tcp_connect:
+    prober: tcp
+  pop3s_banner::q!
+    prober: tcp
+    tcp:
+      query_response:
+      - expect: "^+OK"
+      tls: true
+      tls_config:
+        insecure_skip_verify: false
+  ssh_banner:
+    prober: tcp
+    tcp:
+      query_response:
+      - expect: "^SSH-2.0-"
+  irc_banner:
+    prober: tcp
+    tcp:
+      query_response:
+      - send: "NICK prober"
+      - send: "USER prober prober prober :prober"
+      - expect: "PING :([^ ]+)"
+        send: "PONG ${1}"
+      - expect: "^:[^ ]+ 001"
+  icmp:
+    prober: icmp
+scrape_configs:
+  - job_name: 'blackbox'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]  # Look for a HTTP 200 response.
+    static_configs:
+      - targets:
+        - http://prometheus:9090
+        - http://appx:8080
+        # Target to probe with http.
+        # - https://prometheus.io   # Target to probe with https.
+        # - http://example.com:8080 # Target to probe with http on port 8080.
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: 127.0.0.1:9115  # The blackbox exporter's real hostname:port.
