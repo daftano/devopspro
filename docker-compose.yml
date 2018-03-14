@@ -4,6 +4,10 @@ services:
     image: "appx:latest"
     ports:
      - "8080:8080"
+  users:
+    image: "devopspro.daftano.com/users"
+    ports:
+     - "7071:8080"
   prometheus:
     image: prom/prometheus
     restart: always
